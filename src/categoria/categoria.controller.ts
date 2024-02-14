@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
 import { CategoriaService } from './categoria.service';
 import { CreateCategoriaDto } from './dto/create-categoria.dto';
 import { UpdateCategoriaDto } from './dto/update-categoria.dto';
@@ -19,8 +19,8 @@ export class CategoriaController {
   }
 
   @Get(':id')
-  async obtenerCategoria(@Param('id') id: number) {
-      return this.categoriaService.obtenerCategoria(id);
+  obtenerCategoria(@Param('id')id:number): Promise<Categoria> {
+    return this.categoriaService.obtenerCategoria(id)
   }
 
   @Patch(':id')

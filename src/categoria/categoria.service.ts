@@ -22,12 +22,12 @@ export class CategoriaService {
   }
 
   /* METODO QUE OBTIENE SOLO UNA CATEGORIA */
-  obtenerCategoria(id_categoria: number) {
+  obtenerCategoria(id: number) {
     return this.categoriaRepostitory.findOne({
       where: {
-        id_categoria
+        id_categoria: id
       }
-    });
+    })
   }
 
   /* ACTUALIZAR CATEGORIA PD:ESTA WEA NI SE COMO ME SALIO LA SAQUE EL OJO NOMAS XDDD */

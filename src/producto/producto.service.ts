@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Producto } from './entities/producto.entity';
-import { Categoria } from 'src/categoria/entities/categoria.entity';
 import { Repository } from 'typeorm';
+import { CategoriaService } from 'src/categoria/categoria.service';
 
 
 @Injectable()
@@ -13,39 +13,40 @@ export class ProductoService {
   constructor(
     @InjectRepository(Producto)
     private productoRepository: Repository<Producto>,
-    @InjectRepository(Categoria)
-    private categoriaRepository: Repository<Categoria>
+    private categoriaService: CategoriaService
   ){}
 
-  async crearProducto(nombre: string, precio: number, imagen: Buffer, stock: number, categoriaId: number): Promise<Producto> {
-    const categoria = await this.categoriaRepository.findOne({ where: { id_categoria: categoriaId } });
-    if (!categoria) {
-    throw new Error('La categoría no existe');
-    }
+  /* METODO QUE CREA UN PRODUCTO ASOCIADA CON UNA CATEGORIA ID  */
+  async crearProducto(producto: CreateProductoDto) {
+    const categoriaEncontrada = await this.categoriaService.obtenerCategoria(producto.categoria_id);
 
-    const producto = new Producto();
-    producto.nombre_producto = nombre;
-    producto.precio = precio;   
-    producto.imagen = imagen;
-    producto.stock = stock;
-    producto.categoria = categoria;
-
-    return await this.productoRepository.save(producto);
-}
-
-  findAll() {
-    return `This action returns all producto`;
+    if (!categoriaEncontrada) return new HttpException ('Categoria no encontrada', HttpStatus.NOT_FOUND)
+    
+    const nuevoProducto =  this.productoRepository.create(producto)
+    nuevoProducto.categoria = categoriaEncontrada;
+    return this.productoRepository.save(nuevoProducto)
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} producto`;
+  /* METODO QUE OBTIENE TODOS LOS PRODUCTOS */
+  listarProductos() {
+    return this.productoRepository.find()
   }
 
-  update(id: number, updateProductoDto: UpdateProductoDto) {
-    return `This action updates a #${id} producto`;
+
+  /* METODO QUE OBTIENE SOLO UN PRODUCTO */
+  obtenerProducto(id: number) {
+    return this.productoRepository.findOne({
+      where: {
+        id_producto: id
+      }
+    });
+  }
+
+  actualizarProducto(id_producto: number, producto: UpdateProductoDto) {
+    return this.productoRepository.update({id_producto}, producto);
   }
 
   remove(id: number) {
-    return `This action removes a #${id} producto`;
+    return this.productoRepository.delete(id);
   }
 }
